@@ -95,7 +95,27 @@ app.post('/api/users', auth, async (req, res) => {
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true, id: data[0].id });
 });
-
+// IMPORT FROM DASHBOARD
+app.post('/api/import', auth, async (req, res) => {
+  const { weekly, monthly, targets } = req.body;
+  try {
+    if (targets && targets.length) {
+      for (const row of targets) {
+        await supabase.from('am_targets').upsert(row, { onConflict: 'am_id' });
+      }
+    }
+    if (weekly && weekly.length) {
+      await supabase.from('weekly_data').upsert(weekly, { onConflict: 'id' });
+    }
+    if (monthly && monthly.length) {
+      await supabase.from('monthly_data').upsert(monthly, { onConflict: 'id' });
+    }
+    broadcast('data_imported', { message: 'New data imported' });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 const PORT = process.env.PORT || 3001;
 
 server.listen(PORT, () => console.log('Tata IIS server running on port', PORT));
