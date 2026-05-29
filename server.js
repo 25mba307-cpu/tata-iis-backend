@@ -97,4 +97,9 @@ app.post('/api/users', auth, async (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
+app.get('/api/test-password', async (req, res) => {
+  const hash = '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2uheWG/igi.';
+  const result = await bcrypt.compare('password', hash);
+  res.json({ matches: result });
+});
 server.listen(PORT, () => console.log('Tata IIS server running on port', PORT));
